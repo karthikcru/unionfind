@@ -1,72 +1,45 @@
 package unionfind
-
-import scala.collection.immutable.{HashMap, HashSet}
 class UnionFind [A](elements:List[A]) {
-  var el = new HashMap[A,cluster]
-  for (a <- elements  if a!=null  )
-    el = el + (a -> new cluster(a,HashSet(a)))
+  var items = Map[A, Option[A]]()
+  addElements(elements)
 
+  def addElements(item: List[A]): Unit = {
+    item.map(a => {
+      items = items.+(a -> None)
+    })
+  }
 
-  def removeFromOldAndAddToNew(a:cluster,b:cluster): Unit ={
-    b.set.foreach(element=> {el=el-element+(element->a)})
-    a.set.foreach(element=> {el=el.+(element->a) })
+  def pathCompression(a: A, b: A): Map[A, Option[A]] = {
+    items.filterKeys(keys => items(keys) == Option(a)).map(ele => (ele._1, Option(b)))
+  }
+
+  def union(a: A, b: A) = (items(a), items(b)) match {
+    case (None, Some(x)) => items = items.+(a -> Option(x)) ++ pathCompression(a, x)
+    case (Some(x), Some(y)) if !isOfSameCluster(a, b) => items = items + (x -> Option(y)) ++ pathCompression(x, y)
+
+    case (Some(x), None) => items = items + (x -> Option(b)) ++ pathCompression(x, b)
+    case (None, None) => items = items.+(a -> Option(b)) ++ pathCompression(a, b)
+  }
+
+  def isOfSameCluster(a: A, b: A): Boolean = {
+    require(items.contains(a), items.contains(b))
+    items(a) == Option(b) || items(b) == Option(a) || items(a) == items(b) && !(items(a) == None && items(b) == None)
+  }
+
+  def find(a:A)
+  {
+    require(items.contains(a))
+    items(a)
+  }
+
+  def checkIfSameCluster(list: List[A])
+  {
+    val a= items(list.head)
+    list.foreach(ab=> if(items(ab)!=a)
+    return false)
 
   }
 
-  def makeSet(element:A): Unit = {
-    el=el.+(element->new cluster(element,HashSet(element)))
-  }
-
-  def addToCluster(element:A,clust:A): Unit ={
-    if(el.get(clust)==None)
-      makeSet(element)
-    else
-      union(element,clust)
-  }
-
-  def getCluster(a:A) = {
-    el.get(a).get.set
-  }
-
-  def union(a:A,b:A):cluster = {
-    val first:cluster = el.get(a).get
-    val second:cluster = el.get(b).get
-    if (first.set.contains(b)||second.set.contains(a))
-      return first
-
-    if(first.set.size>second.set.size) {
-      removeFromOldAndAddToNew(first.copy(set = first.set ++ second.set),second)
-      println("hello here")
-      first.copy(set = first.set ++ second.set)
-    }
-
-    else{
-      removeFromOldAndAddToNew(second.copy(set= second.set++first.set),first)
-      println("hello there")
-      println(second.copy(set= second.set++first.set))
-      println("i am first"+first)
-      second.copy(set= second.set++first.set)
-    }
-  }
-
-  def find(a: A,b:A):Boolean= {
-    el.get(a).get.set.contains(b)
-  }
-
-
-  case class cluster(e: A,set:HashSet[A]) {
-    set.apply(e)
-    def addElement(ele: A) = {
-      this.copy(e = ele)
-    }
-  }
-}
-
-case class cluster[A](e: A,set:HashSet[A]) {
-  set.apply(e)
-  def addElement(ele: A) = {
-    this.copy(e = ele)
-  }
 }
 
 

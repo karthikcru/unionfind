@@ -1,39 +1,76 @@
 package unionfind
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.FreeSpec
+import org.scalatest.Matchers._
 
 
-import scala.collection.immutable.{HashSet, HashMap}
+class UnionFindSpec extends FreeSpec {
 
-/**
- * Created by indix on 23/1/15.
- */
-class UnionFindSpec extends FlatSpec with Matchers {
-  val elements = List(1,2,3,4,5)
-  val unionFind = new UnionFind(elements)
-  "UnionFind" should "insert all elements passed to it into individual cluster" in {
-    
-    unionFind.el.size should be (5)
-    unionFind.el.toList.map(_._1).toSet should be (elements.toSet)
+
+"unionfind" - {
+  "do find correctly" in {
+    val elements = List(1,2,3,4,5)
+    val unionFind = new UnionFind(elements)
+
+    unionFind.addElements(List(1, 2, 3, 4, 5))
+    unionFind.isOfSameCluster(2, 3) should be(false)
   }
-  
-  it should "perform the union of clusters" in {
+
+  "do union correctly when both elements are root" in {
+    val elements = List(1,2,3,4,5)
+    val unionFind = new UnionFind(elements)
+
     unionFind.union(2, 3)
-    unionFind.find(2, 3) should be(true)
-    val c = unionFind.el.get(1).get
-    unionFind.el should be(HashMap(
-      1 -> new unionFind.cluster(1, HashSet(1)),
-      2 -> new unionFind.cluster(3, HashSet(2, 3)),
-      3 -> new unionFind.cluster(3, HashSet(2, 3)),
-      4 -> new unionFind.cluster(4, HashSet(4)),
-      5 -> new unionFind.cluster(5, HashSet(5)))
-    )
+    unionFind.isOfSameCluster(2, 3) should be(true)
   }
 
-  it should "perform find" in  {
+  "do union correctly when one of the elements is non root" in {
+    val elements = List(1,2,3,4,5)
+    val unionFind = new UnionFind(elements)
+    unionFind.union(2, 3)
+    unionFind.union(2,4)
+    unionFind.isOfSameCluster(2,4)  should be (true)
+  }
+
+  "do union correctly when bothe elements are not root" in {
+    val elements = List(1,2,3,4,5)
+    val unionFind = new UnionFind(elements)
     unionFind.union(2,3)
-    unionFind.find(2,3) should be (true)
-    unionFind.find(3,4) should be (false)
-
+    unionFind.union(1,4)
+    unionFind.union(1,2)
+//    unionFind.union(4,5)
+    println(unionFind.items)
+    unionFind.isOfSameCluster(2,3) should be (true)
+//    unionFind.find(4,5) should be (true)
+//    unionFind.find(1,4) should be (true)
   }
+
+  "do union find for pair wise elements " in {
+    val elements = (0 to 10).toList
+    val unionFind = new UnionFind(elements)
+    unionFind.union(0, 1)
+    println(unionFind.items)
+    unionFind.union(2, 1)
+    println(unionFind.items)
+    unionFind.union(1, 5)
+    println(unionFind.items)
+    unionFind.union(4, 6)
+    println(unionFind.items)
+    unionFind.union(4, 1)
+    println(unionFind.items)
+    unionFind.union(7, 4)
+    println(unionFind.items)
+    unionFind.union(7, 5)
+    println(unionFind.items)
+    unionFind.union(9, 6)
+    println(unionFind.items)
+
+    unionFind.isOfSameCluster(4,9) should be(true)
+    print("amma")
+    unionFind.isOfSameCluster(0,2) should be(true)
+    print("ammaa")
+    unionFind.isOfSameCluster(1,9) should be(true)
+    print("ammaaa")
+  }
+}
 
 }
