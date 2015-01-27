@@ -5,3 +5,4 @@ var b = (99->99)
 a.par.filterKeys(key=> a(key)==66).par.map( a => (a._1,5))
 a+b
 
+(0 to 10 ).toList
